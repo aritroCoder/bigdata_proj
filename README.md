@@ -1,5 +1,5 @@
 ## Set up environment
-Create a `.env` file in the root directory with the following content:
+Create a `.env` file in the root directory with the following content (replace path your own):
 ```bash
 DATASET_DIR=/home/fishnak/Documents/Coding/python/bigdata_proj/dataset
 ```
