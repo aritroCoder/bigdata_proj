@@ -1,0 +1,11 @@
+*.csv  
+**/*.pyc
+**/*.json
+**/*.pdf
+# **/*.ipynb
+**/*.pickle
+**/*.out
+Dataset/
+__pycache__/
+.env
+dataset/
