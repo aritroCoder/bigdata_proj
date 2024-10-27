@@ -69,6 +69,8 @@ def train_model(model, train_loader, criterion, optimizer, device):
             x_batch = x_batch.to(device)
             y_batch = y_batch.to(device)
 
+            print(x_batch.shape)
+
             optimizer.zero_grad()
             output = model(x_batch)
             loss = criterion(output, y_batch)
@@ -131,5 +133,5 @@ def main(file_path):
     plt.show()
 
 # Run the code
-file_path = '/mnt/Data/raghav/BIGDATA/realAdExchange/realAdExchange/exchange-3_cpc_results.csv'  # Specify your CSV file path here
+file_path = "/home/fishnak/Documents/Coding/python/bigdata_proj/dataset/nab/raw_data/realAdExchange/realAdExchange/exchange-2_cpc_results.csv"  # Specify your CSV file path here
 main(file_path)

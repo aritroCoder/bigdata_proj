@@ -1,6 +1,6 @@
 import argparse
 import torch
-from .flearn.trainers.fedavg import Server
+from flearn.trainers.fedavg import Server
 
 def main():
     parser = argparse.ArgumentParser()
@@ -30,15 +30,16 @@ def main():
     args = parser.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-
     server = Server(
         dataset=args.dataset,
         pkl_folder=args.type,
         model=args.model,
         rounds=args.rounds,
-        epochs=50,
+        epochs=10,
         batch_size=32,
         device=device,
     )
 
     server.train()
+
+main()

@@ -1,10 +1,11 @@
 import os
-from matplotlib import pyplot as plt
 import torch
 import pickle
 import numpy as np
+from tqdm import tqdm
 from tqdm import trange
 from dotenv import load_dotenv
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 
 from ..models.model import get_model_by_name
@@ -31,7 +32,7 @@ class Server:
         self.dataset = dataset
         self.pkl_folder = pkl_folder
         self.model = model
-        self.num_clients = len(os.listdir(f"{DATASET_DIR}/{dataset}/{pkl_folder}"))
+        self.num_clients = len(os.listdir(f"{DATASET_DIR}/{dataset}/{pkl_folder}")) - 1 # -1 for test.pkl
         self.test_pkl = f"{DATASET_DIR}/{dataset}/{pkl_folder}/test.pkl"
         self.rounds = rounds
         self.epochs = epochs
@@ -81,12 +82,12 @@ class Server:
 
     def train(self):
         for i in trange(self.rounds, desc="Round"):
-            print(f"\nRound {i+1}/{self.rounds}")
+            tqdm.write(f"\nRound {i+1}/{self.rounds}")
             csolns = []
             for c in self.clients:
                 c.set_params(self.global_params)
                 soln, samples = c.solve_inner()
-                csolns.append((soln, samples))
+                csolns.append((samples, soln))
             self.global_params = self.aggregate(csolns)
 
         self.set_params(self.global_params)
@@ -97,8 +98,8 @@ class Server:
         plt.xlabel("Time")
         plt.ylabel("Value")
         plt.legend()
-        plt.title(f"{self.pkl_folder}")
-        plt.savefig(f"{self.dataset}_{self.model}.png")
+        plt.title(f"Model: {self.model}")
+        plt.savefig(f"{self.dataset}_{self.pkl_folder}.png")
 
     def test(self):
         with open(self.test_pkl, "rb") as file:
@@ -115,8 +116,8 @@ class Server:
                 predictions.append(output.cpu().numpy())
                 actuals.append(y_batch.cpu().numpy())
 
-        predictions = data.scaler.inverse_transform(np.concatenate(predictions))
-        actuals = data.scaler.inverse_transform(np.concatenate(actuals))
+        predictions = data.scaler.inverse_transform(np.concatenate(predictions).reshape(-1, 1))
+        actuals = data.scaler.inverse_transform(np.concatenate(actuals).reshape(-1, 1))
         return predictions, actuals
 
     def aggregate(self, wsolns):  # Weighted average
@@ -126,7 +127,7 @@ class Server:
         for w, soln in wsolns:  # w is the number of local samples
             total_weight += w
             for i, v in enumerate(soln):
-                base[i] += w * v.astype(np.float64)
+                base[i] += w * v.to(torch.float64)
 
         averaged_soln = [v / total_weight for v in base]
 

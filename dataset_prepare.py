@@ -4,8 +4,7 @@ import numpy as np
 import random
 import torch
 from argparse import Namespace
-from torchvision import transforms
-from sklearn.preprocessing import MinMaxScaler
+# from torchvision import transforms
 
 from flearn.data.dataset import NABData, NABDataset
 from dotenv import load_dotenv
@@ -27,7 +26,7 @@ def preprocess(args: Namespace) -> None:
     random.seed(0)
     torch.manual_seed(0)
 
-    transform = transforms.ToTensor()
+    transform =None
     target_transform = None
 
     if not os.path.isdir(dataset_dir):
@@ -38,7 +37,7 @@ def preprocess(args: Namespace) -> None:
     if args.dataset == "nab":
         trainset = ori_dataset(
             root=os.path.join(dataset_dir, "raw_data"),
-            transform=transforms.ToTensor(),
+            transform=None,
             target_transform=None,
             download=True,
             domain=args.domain,
@@ -47,7 +46,7 @@ def preprocess(args: Namespace) -> None:
         )
         testset = ori_dataset(
             root=os.path.join(dataset_dir, "raw_data"),
-            transform=transforms.ToTensor(),
+            transform=None,
             target_transform=None,
             download=True,
             domain=args.domain,
@@ -56,9 +55,9 @@ def preprocess(args: Namespace) -> None:
         )
     else:  # Should not be executed
         trainset = ori_dataset(
-            dataset_dir, train=True, download=True, transform=transforms.ToTensor()
+            dataset_dir, train=True, download=True, transform=None
         )
-        testset = ori_dataset(dataset_dir, train=False, transform=transforms.ToTensor())
+        testset = ori_dataset(dataset_dir, train=False, transform=None)
 
     all_trainsets = []
     for data in trainset.datasets:

@@ -64,7 +64,7 @@ class Client:
                 y_batch = y_batch.to(self.device)
                 self.optimizer.zero_grad()
                 output = self.model(x_batch)
-                loss = self.criterion(output, y_batch)
+                loss = self.criterion(output, y_batch.view(-1, 1))
                 loss.backward()
                 self.optimizer.step()
                 epoch_loss += loss.item()

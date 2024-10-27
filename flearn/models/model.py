@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-IMPUT_SIZE = {
+INPUT_SIZE = {
     "nab": 1
 }
 
@@ -29,9 +29,8 @@ class GRUModel(nn.Module):
 
 
 def get_model_by_name(dataset, device, model):
-    print(f"\nIn model.py to build: {model} model")
     MODEL_DICT = {
-        "grunet": GRUModel(IMPUT_SIZE[dataset], HIDDEN_SIZE[dataset], OUTPUT_SIZE[dataset], NUM_LAYERS[dataset])
+        "grunet": GRUModel(INPUT_SIZE[dataset], HIDDEN_SIZE[dataset], OUTPUT_SIZE[dataset], NUM_LAYERS[dataset])
     }
     c_model = MODEL_DICT[model].to(device)
     return c_model
