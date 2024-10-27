@@ -6,7 +6,7 @@ DATASET_DIR=/home/fishnak/Documents/Coding/python/bigdata_proj/dataset
 
 ## Generate dataset
 ```bash
-python generate_clients_dataset.py --dataset nab --domain rae --fraction 0.8 --seq_length 5
+python generate_clients_dataset.py --dataset nab --domain rae --fraction 0.8 --seq_length 30
 ```
 ### Arguments
 - `--dataset`: dataset name (default: `nab`). Available options:
@@ -22,3 +22,8 @@ python generate_clients_dataset.py --dataset nab --domain rae --fraction 0.8 --s
 	- `rtw`: Real Tweets
 - `--fraction`: fraction of the dataset to be used for train(default: `0.8`)
 - `--seq_length`: sequence length for GRU (default: `30`)
+
+## Run Model
+```bash
+python main.py --dataset nab --type rae_s_5_f_8 --model grunet --rounds 5
+```
