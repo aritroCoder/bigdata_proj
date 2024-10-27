@@ -61,6 +61,7 @@ def preprocess(args: Namespace) -> None:
 
     all_trainsets = []
     for data in trainset.datasets:
+        data = torch.Tensor(data)
         all_trainsets.append(
             target_dataset(
                 data, args.seq_length, trainset.scalar, transform, target_transform
