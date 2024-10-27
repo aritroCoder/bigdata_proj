@@ -76,7 +76,8 @@ class NABData:
 
 class NABDataset(Dataset):
     def __init__(self, data, seq_length, scaler, transform=None, target_transform=None):
-        self.data = torch.tensor(data, dtype=torch.float32)
+        # self.data = torch.tensor(data, dtype=torch.float32)
+        self.data=data.to(torch.float32)
         self.seq_length = seq_length
         self.transform = transform
         self.scaler = scaler
