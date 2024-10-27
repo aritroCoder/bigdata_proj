@@ -3,6 +3,7 @@ from typing import Callable, Optional
 import pandas as pd
 from torch.utils.data import Dataset
 from torchvision.datasets.utils import download_and_extract_archive
+from sklearn.preprocessing import MinMaxScaler
 
 nab_domain_to_folder = {
     "ana": "artificialNoAnomaly", 
@@ -39,6 +40,7 @@ class NABData:
         self.train = train
         self.split = split
         self.domain = domain
+        self.scalar = MinMaxScaler()
 
         if download:
             self.download()
@@ -63,6 +65,7 @@ class NABData:
                 )
                 df = df.sort_values(by="timestamp")
                 data = df["value"].values
+                data = self.scalar.fit_transform(data.reshape(-1, 1)).flatten()
                 if self.train:
                     data = data[:int(len(data) * self.split)]
                 else:
@@ -71,10 +74,11 @@ class NABData:
                 print(f"Loaded {file} with {len(data)} samples.")
 
 class NABDataset(Dataset):
-    def __init__(self, data, seq_length, transform=None, target_transform=None):
+    def __init__(self, data, seq_length, scalar, transform=None, target_transform=None):
         self.data = data
         self.seq_length = seq_length
         self.transform = transform
+        self.scalar = scalar
         self.target_transform = target_transform
 
     def __len__(self):
@@ -91,6 +95,9 @@ class NABDataset(Dataset):
             target = self.target_transform(target)
 
         return data, target
+
+    def scale_inverse(self, data):
+        return self.scalar.inverse_transform(data)
 
 
 # test = NABData(root="dataset/nab", download=True)

@@ -5,6 +5,7 @@ import random
 import torch
 from argparse import Namespace
 from torchvision import transforms
+from sklearn.preprocessing import MinMaxScaler
 
 from flearn.data.dataset import NABData, NABDataset
 from dotenv import load_dotenv
@@ -15,9 +16,8 @@ CURRENT_DIR = os.getenv(
     "DATASET_DIR"
 )  # /home/fishnak/Documents/Coding/python/bigdata_proj/dataset
 
-DATASET = {
-    "nab": (NABData, NABDataset)
-}
+DATASET = {"nab": (NABData, NABDataset)}
+
 
 def preprocess(args: Namespace) -> None:
     print(args)
@@ -42,8 +42,8 @@ def preprocess(args: Namespace) -> None:
             target_transform=None,
             download=True,
             domain=args.domain,
-            split = args.fraction,
-            train=True
+            split=args.fraction,
+            train=True,
         )
         testset = ori_dataset(
             root=os.path.join(dataset_dir, "raw_data"),
@@ -51,10 +51,10 @@ def preprocess(args: Namespace) -> None:
             target_transform=None,
             download=True,
             domain=args.domain,
-            split = args.fraction,
-            train=False
+            split=args.fraction,
+            train=False,
         )
-    else: # Should not be executed
+    else:  # Should not be executed
         trainset = ori_dataset(
             dataset_dir, train=True, download=True, transform=transforms.ToTensor()
         )
@@ -62,14 +62,20 @@ def preprocess(args: Namespace) -> None:
 
     all_trainsets = []
     for data in trainset.datasets:
-        all_trainsets.append(target_dataset(data, args.seq_length, transform, target_transform))
+        all_trainsets.append(
+            target_dataset(
+                data, args.seq_length, trainset.scalar, transform, target_transform
+            )
+        )
 
     test_data = []
     for data in testset.datasets:
         data = torch.Tensor(data)
         test_data.extend(data)
     test_data = torch.stack(test_data)
-    testset = target_dataset(test_data, args.seq_length, transform, target_transform)
+    testset = target_dataset(
+        test_data, args.seq_length, testset.scalar, transform, target_transform
+    )
 
     client_id = 0
     for dataset in all_trainsets:
