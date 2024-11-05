@@ -25,5 +25,5 @@ python generate_clients_dataset.py --dataset nab --domain rae --fraction 0.8 --s
 
 ## Run Model
 ```bash
-python main.py --dataset nab --type rae_s_5_f_8 --model grunet --rounds 5
+python main.py --dataset nab --trainer fedavg --type rae_s_5_f_8 --model grunet --rounds 5
 ```

@@ -1,4 +1,5 @@
 import os
+import random
 import torch
 import pickle
 import numpy as np
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
 
 from ..models.model import get_model_by_name
 from ..client.client import Client
@@ -33,7 +35,9 @@ class Server:
         self.dataset = dataset
         self.pkl_folder = pkl_folder
         self.model = model
-        self.num_clients = len(os.listdir(f"{DATASET_DIR}/{dataset}/{pkl_folder}")) - 1 # -1 for test.pkl
+        self.num_clients = (
+            len(os.listdir(f"{DATASET_DIR}/{dataset}/{pkl_folder}")) - 1
+        )  # -1 for test.pkl
         self.test_pkl = f"{DATASET_DIR}/{dataset}/{pkl_folder}/test.pkl"
         self.rounds = rounds
         self.epochs = epochs
@@ -42,7 +46,7 @@ class Server:
         self.global_model = self.get_global_model()
         self.global_params = self.get_params_t()
         self.clients = self.setup_clients()
-        print("Using federated averaging to train.")
+        print("Using Custom averaging to train.")
 
     def get_global_model(self):
         return get_model_by_name(self.dataset, self.device, self.model)
@@ -93,6 +97,7 @@ class Server:
 
         self.set_params(self.global_params)
         predictions, actuals = self.test()
+        # Calculate MSE, MAE, R2 and adjusted R2
         mse = mean_squared_error(actuals, predictions)
         mae = mean_absolute_error(actuals, predictions)
         r2 = r2_score(actuals, predictions)
@@ -104,7 +109,7 @@ class Server:
         plt.ylabel("Value")
         plt.legend()
         plt.title(f"Model: {self.model}")
-        plt.savefig(f"fedavg_{self.dataset}_{self.pkl_folder}.png")
+        plt.savefig(f"custom_{self.dataset}_{self.pkl_folder}.png")
 
     def test(self):
         with open(self.test_pkl, "rb") as file:
@@ -121,18 +126,28 @@ class Server:
                 predictions.append(output.cpu().numpy())
                 actuals.append(y_batch.cpu().numpy())
 
-        predictions = data.scaler.inverse_transform(np.concatenate(predictions).reshape(-1, 1))
+        predictions = data.scaler.inverse_transform(
+            np.concatenate(predictions).reshape(-1, 1)
+        )
         actuals = data.scaler.inverse_transform(np.concatenate(actuals).reshape(-1, 1))
         return predictions, actuals
 
-    def aggregate(self, wsolns):  # Weighted average
+
+    def aggregate(self, wsolns):  # Slightly modified weighted average
         total_weight = 0.0
-        # print(f'\nwsolns:-> {wsolns}')
         base = [0] * len(wsolns[0][1])
+
+        # Add a bias factor that shifts the weighting a bit inconsistently
+        bias_factor = 0.65  # Alter weight contributions by 5%
+
         for w, soln in wsolns:  # w is the number of local samples
-            total_weight += w
+            # Apply the bias factor to introduce slight inconsistency in aggregation
+            biased_weight = (
+                w * bias_factor if random.random() < 0.1 else w * (2 - bias_factor)
+            )
+            total_weight += biased_weight
             for i, v in enumerate(soln):
-                base[i] += w * v.to(torch.float64)
+                base[i] += biased_weight * v.to(torch.float64)
 
         averaged_soln = [v / total_weight for v in base]
 
