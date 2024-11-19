@@ -30,8 +30,9 @@ python main.py --dataset nab --trainer fedavg --type rae_s_5_f_8 --model grunet 
 
 ## UCF101 Dataset
 ```bash
-$ cd data/
-$ bash download_ucf101.sh # Downloads the UCF-101 dataset (~7.2 GB)
-$ python extract_frames.py # Extracts frames from the video (~26.2 GB)
-$ python3 train_fl.py
+cd UCF101/
+mkdir data & cd data/
+bash download_ucf101.sh # Downloads the UCF-101 dataset (~7.2 GB)
+python extract_frames.py # Extracts frames from the video (~26.2 GB)
+python3 train_fl.py
 ```
