@@ -27,3 +27,11 @@ python generate_clients_dataset.py --dataset nab --domain rae --fraction 0.8 --s
 ```bash
 python main.py --dataset nab --trainer fedavg --type rae_s_5_f_8 --model grunet --rounds 5
 ```
+
+## UCF101 Dataset
+```bash
+$ cd data/
+$ bash download_ucf101.sh # Downloads the UCF-101 dataset (~7.2 GB)
+$ python extract_frames.py # Extracts frames from the video (~26.2 GB)
+$ python3 train_fl.py
+```
